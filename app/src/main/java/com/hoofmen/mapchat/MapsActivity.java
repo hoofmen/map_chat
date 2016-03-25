@@ -18,6 +18,11 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -99,7 +104,39 @@ public class MapsActivity extends FragmentActivity implements LocationListener {
         // Zoom in the Google Map
         mMap.animateCamera(CameraUpdateFactory.zoomTo(15));
         marker = mMap.addMarker(new MarkerOptions().position(new LatLng(latitude, longitude)).title("You are here!").snippet("I'm watching..."));
-        Toast.makeText(this, "Lat: " + latitude + ", " + longitude, Toast.LENGTH_SHORT).show();
+        sendHttpGetVolley();
+    }
+
+    private void sendHttpGetVolley(){
+        String url = "http://httpbin.org/html";
+
+        // Request a string response
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+
+                        // Result handling
+                        String message = response.substring(0,15);
+                        System.out.println(message);
+                        Toast.makeText(MapsActivity.this, message, Toast.LENGTH_SHORT).show();
+
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+
+                // Error handling
+                String message = "Something went wrong!";
+                Toast.makeText(MapsActivity.this, message, Toast.LENGTH_SHORT).show();
+                System.out.println(message);
+                error.printStackTrace();
+
+            }
+        });
+
+        // Add the request to the queue
+        Volley.newRequestQueue(this).add(stringRequest);
     }
 
     /**
@@ -151,8 +188,6 @@ public class MapsActivity extends FragmentActivity implements LocationListener {
         mMap.animateCamera(CameraUpdateFactory.zoomTo(15));
         marker.remove();
         marker = mMap.addMarker(new MarkerOptions().position(new LatLng(latitude, longitude)).title("You are here!").snippet("Consider yourself located"));
-
-        Toast.makeText(this, "Lat: " + latitude + ", Lon: " + longitude, Toast.LENGTH_SHORT).show();
     }
 
     @Override
